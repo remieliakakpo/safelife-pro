@@ -46,7 +46,7 @@ export default function CartographieAccidents() {
   const [vue,       setVue]       = useState<'heatmap'|'hotspots'|'mixte'>('mixte');
   const [loading,   setLoading]   = useState(true);
   const [connected, setConnected] = useState(false);
-  const [lastAlert, setLastAlert] = useState<any>(null);
+  const [, setLastAlert] = useState<any>(null);
   const [zooming,   setZooming]   = useState(false);
 
   // ── Init carte ────────────────────────────────────────────
