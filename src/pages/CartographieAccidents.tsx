@@ -186,7 +186,7 @@ export default function CartographieAccidents() {
   const zoomCinematique = useCallback((lat: number, lng: number, label?: string) => {
     if (!mapInst.current || zooming) return;
     setZooming(true);
-    setLastAlert({ lat, lng, label });
+  
 
     const map = mapInst.current;
 
