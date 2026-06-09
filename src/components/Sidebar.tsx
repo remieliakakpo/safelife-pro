@@ -1,96 +1,178 @@
 import React from 'react';
 
 interface Props {
-  page:       string;
-  onNavigate: (p: string) => void;
-  user:       any;
-  nbAlertes:  number;
+  page:        string;
+  onNavigate:  (p: string) => void;
+  user:        any;
+  nbAlertes:   number;
+  connected?:  boolean;
+  theme?:      'dark' | 'light';
 }
 
 const NAV = [
   { section: 'URGENCES', items: [
-    { id: 'dashboard',    label: 'Tableau de bord', icon: '⊞', badge: null },
-    { id: 'alertes',      label: 'Alertes SOS',     icon: '⚠', badge: 'red' },
-    { id: 'carte',        label: 'Carte live',       icon: '◉', badge: null },
-    { id: 'victimes',     label: 'Fiches victimes',  icon: '✎', badge: null },
+    { id: 'dashboard',    label: 'Tableau de bord', icon: 'ti-layout-dashboard', badge: null },
+    { id: 'alertes',      label: 'Alertes SOS',     icon: 'ti-alert-triangle',   badge: 'red' },
+    { id: 'carte',        label: 'Carte live',       icon: 'ti-map-pin',          badge: null },
+    { id: 'victimes',     label: 'Fiches victimes',  icon: 'ti-id-badge',         badge: null },
   ]},
   { section: 'OPÉRATIONS', items: [
-    { id: 'interventions',label: 'Interventions',    icon: '☰', badge: 'green' },
-    { id: 'scans',        label: 'Historique scans', icon: '⊕', badge: null },
-    { id: 'cartographie', label: 'Cartographie',     icon: '▦', badge: null },
+    { id: 'interventions',label: 'Interventions',    icon: 'ti-ambulance',        badge: 'green' },
+    { id: 'scans',        label: 'Historique scans', icon: 'ti-qrcode',           badge: null },
+    { id: 'cartographie', label: 'Cartographie',     icon: 'ti-map-2',            badge: null },
   ]},
-  { section: 'ADMIN', items: [
-    { id: 'stats',        label: 'Statistiques',     icon: '📊', badge: null },
-    { id: 'settings',     label: 'Paramètres',       icon: '⚙', badge: null },
+  { section: 'ANALYSE', items: [
+    { id: 'stats',        label: 'Statistiques',     icon: 'ti-chart-bar',        badge: null },
+    { id: 'parametres',   label: 'Paramètres & GRC', icon: 'ti-settings',         badge: null },
   ]},
 ];
 
-export default function Sidebar({ page, onNavigate, user, nbAlertes }: Props) {
+export default function Sidebar({
+  page, onNavigate, user, nbAlertes, connected = false, theme = 'dark'
+}: Props) {
   const initiales = user?.nom
     ? user.nom.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
     : 'PR';
 
-  return (
-    <div className="w-52 bg-s1 border-r border-bord flex flex-col flex-shrink-0">
+  const isDark = theme === 'dark';
 
-      {/* Logo */}
-      <div className="px-4 py-5 border-b border-bord">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-urg-red rounded-lg flex items-center justify-center text-white font-black text-sm flex-shrink-0">
-            SL
+  return (
+    <div style={{
+      width: '220px',
+      background: isDark ? '#131109' : '#F7F3EB',
+      borderRight: `1px solid ${isDark ? '#2E2A1A' : '#E0D8C4'}`,
+      display: 'flex',
+      flexDirection: 'column',
+      flexShrink: 0,
+    }}>
+
+      {/* ── Logo ─────────────────────────────────────────── */}
+      <div style={{
+        padding: '18px 16px 14px',
+        borderBottom: `1px solid ${isDark ? '#2E2A1A' : '#E0D8C4'}`,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '34px', height: '34px',
+            background: 'linear-gradient(135deg, #CFA237, #A67C20)',
+            borderRadius: '10px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 900, fontSize: '13px', color: '#0C0A09',
+            flexShrink: 0,
+          }}>
+            LS
           </div>
           <div>
-            <div className="flex items-baseline gap-0.5">
-              <span className="text-base font-black text-t1">Safe</span>
-              <span className="text-base font-black text-togo-yellow">Life</span>
-              <span className="ml-1 text-[8px] font-bold bg-urg-green/20 text-urg-green px-1.5 py-0.5 rounded border border-urg-green/30">
-                PRO
-              </span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+              <span style={{
+                fontSize: '15px', fontWeight: 800,
+                color: isDark ? '#F5F0E8' : '#1A1209',
+              }}>LOTI</span>
+              <span style={{ fontSize: '15px', fontWeight: 800, color: '#CFA237' }}>SEC</span>
+              <span style={{
+                marginLeft: '4px', fontSize: '8px', fontWeight: 700,
+                background: 'rgba(207,162,55,0.15)',
+                color: '#CFA237',
+                padding: '2px 5px', borderRadius: '4px',
+                border: '1px solid rgba(207,162,55,0.3)',
+              }}>PRO</span>
             </div>
-            <div className="text-[9px] text-t3">Centre opérationnel</div>
+            <div style={{
+              fontSize: '9px',
+              color: isDark ? '#4A4430' : '#8C7D5E',
+              marginTop: '1px',
+            }}>
+              Centre opérationnel
+            </div>
           </div>
         </div>
-        <div className="flex h-0.5 mt-2 rounded overflow-hidden">
-          <div className="flex-1 bg-togo-green"></div>
-          <div className="flex-1 bg-togo-yellow"></div>
-          <div className="flex-1 bg-togo-red"></div>
+
+        {/* Drapeau togolais */}
+        <div style={{
+          display: 'flex', height: '2px',
+          marginTop: '10px', borderRadius: '1px', overflow: 'hidden',
+        }}>
+          <div style={{ flex: 1, background: '#007A3D' }}></div>
+          <div style={{ flex: 1, background: '#CFA237' }}></div>
+          <div style={{ flex: 1, background: '#E07E6B' }}></div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 py-2 overflow-y-auto">
+      {/* ── Navigation ───────────────────────────────────── */}
+      <nav style={{ flex: 1, padding: '8px 0', overflowY: 'auto' }}>
         {NAV.map(section => (
           <div key={section.section}>
-            <div className="text-[9px] font-semibold text-t3 px-4 py-2 mt-2 tracking-widest">
+            <div style={{
+              fontSize: '9px', fontWeight: 600,
+              color: isDark ? '#4A4430' : '#8C7D5E',
+              padding: '10px 16px 4px',
+              letterSpacing: '0.08em',
+            }}>
               {section.section}
             </div>
+
             {section.items.map(item => {
               const active = page === item.id;
               const count  = item.badge === 'red'   ? nbAlertes
-                           : item.badge === 'green' ? 12
-                           : 0;
+                           : item.badge === 'green' ? 0 : 0;
               return (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-left transition-colors border-r-2 ${
-                    active
-                      ? 'bg-urg-red/10 border-urg-red text-t1'
-                      : 'border-transparent hover:bg-white/5 text-t2'
-                  }`}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '9px',
+                    padding: '8px 16px',
+                    border: 'none',
+                    borderRight: `2px solid ${active ? '#CFA237' : 'transparent'}`,
+                    background: active
+                      ? (isDark ? 'rgba(207,162,55,0.08)' : 'rgba(207,162,55,0.1)')
+                      : 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={e => {
+                    if (!active) (e.currentTarget as HTMLButtonElement).style.background =
+                      isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
+                  }}
+                  onMouseLeave={e => {
+                    if (!active) (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                  }}
                 >
-                  <span className={`text-sm w-4 text-center flex-shrink-0 ${active ? 'text-urg-red' : ''}`}>
-                    {item.icon}
-                  </span>
-                  <span className={`text-xs font-medium flex-1 ${active ? 'font-semibold text-t1' : ''}`}>
+                  <i
+                    className={`ti ${item.icon}`}
+                    style={{
+                      fontSize: '16px',
+                      color: active ? '#CFA237' : (isDark ? '#4A4430' : '#8C7D5E'),
+                      flexShrink: 0,
+                      width: '18px',
+                      textAlign: 'center',
+                    }}
+                    aria-hidden="true"
+                  />
+                  <span style={{
+                    fontSize: '12px',
+                    fontWeight: active ? 600 : 400,
+                    color: active
+                      ? (isDark ? '#F5F0E8' : '#1A1209')
+                      : (isDark ? '#9B9070' : '#5A4E35'),
+                    flex: 1,
+                  }}>
                     {item.label}
                   </span>
                   {count > 0 && (
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                      item.badge === 'red'
-                        ? 'bg-urg-red text-white'
-                        : 'bg-urg-green text-white'
-                    }`}>
+                    <span style={{
+                      fontSize: '9px', fontWeight: 700,
+                      padding: '2px 6px', borderRadius: '99px',
+                      background: item.badge === 'red'
+                        ? 'rgba(224,126,107,0.2)'
+                        : 'rgba(76,175,125,0.2)',
+                      color: item.badge === 'red' ? '#E07E6B' : '#4CAF7D',
+                      border: `1px solid ${item.badge === 'red' ? 'rgba(224,126,107,0.3)' : 'rgba(76,175,125,0.3)'}`,
+                    }}>
                       {count}
                     </span>
                   )}
@@ -101,21 +183,62 @@ export default function Sidebar({ page, onNavigate, user, nbAlertes }: Props) {
         ))}
       </nav>
 
-      {/* Utilisateur */}
-      <div className="px-3.5 py-3 border-t border-bord">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-urg-green/20 border border-urg-green/30 flex items-center justify-center text-[10px] font-bold text-urg-green flex-shrink-0">
+      {/* ── Statut connexion ─────────────────────────────── */}
+      <div style={{
+        padding: '8px 16px',
+        borderTop: `1px solid ${isDark ? '#2E2A1A' : '#E0D8C4'}`,
+        borderBottom: `1px solid ${isDark ? '#2E2A1A' : '#E0D8C4'}`,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{
+            width: '6px', height: '6px', borderRadius: '50%',
+            background: connected ? '#4CAF7D' : '#E07E6B',
+            flexShrink: 0,
+          }} className={connected ? 'pulse-green' : ''} />
+          <span style={{
+            fontSize: '10px',
+            color: connected
+              ? '#4CAF7D'
+              : (isDark ? '#9B9070' : '#5A4E35'),
+          }}>
+            {connected ? 'Realtime connecté' : 'Connexion...'}
+          </span>
+        </div>
+      </div>
+
+      {/* ── Utilisateur ──────────────────────────────────── */}
+      <div style={{ padding: '12px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+          <div style={{
+            width: '30px', height: '30px', borderRadius: '50%',
+            background: 'rgba(207,162,55,0.15)',
+            border: '1px solid rgba(207,162,55,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '11px', fontWeight: 700, color: '#CFA237',
+            flexShrink: 0,
+          }}>
             {initiales}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[11px] font-bold text-t1 truncate">
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: '11px', fontWeight: 600,
+              color: isDark ? '#F5F0E8' : '#1A1209',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
               {user?.nom || 'Professionnel'}
             </div>
-            <div className="text-[9px] text-t3 truncate">
-              {user?.role || ''} · {user?.unite || ''}
+            <div style={{
+              fontSize: '9px',
+              color: isDark ? '#4A4430' : '#8C7D5E',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {user?.role || ''}{user?.unite ? ` · ${user.unite}` : ''}
             </div>
           </div>
-          <div className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></div>
+          <div style={{
+            width: '7px', height: '7px', borderRadius: '50%',
+            background: '#4CAF7D', flexShrink: 0,
+          }} />
         </div>
       </div>
     </div>

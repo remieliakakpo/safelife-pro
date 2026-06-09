@@ -1,10 +1,12 @@
-import React from 'react';
-import { logoutPro } from '../services/api';
+import React, { useState, useEffect } from 'react';
 
 interface Props {
-  titre:     string;
-  nbAlertes: number;
-  onLogout:  () => void;
+  titre:          string;
+  nbAlertes:      number;
+  onLogout:       () => void;
+  connected?:     boolean;
+  theme?:         'dark' | 'light';
+  onToggleTheme?: () => void;
 }
 
 const TITRES: Record<string, string> = {
@@ -14,50 +16,148 @@ const TITRES: Record<string, string> = {
   victimes:     'Fiches victimes',
   interventions:'Interventions',
   scans:        'Historique des scans',
-  cartographie: 'Cartographie des accidents',
-  stats:        'Statistiques',
-  settings:     'Paramètres',
+  cartographie: 'Cartographie géodécisionnelle',
+  stats:        'Statistiques & Business Intelligence',
+  parametres:   'Paramètres & GRC',
 };
 
-export default function Topbar({ titre, nbAlertes, onLogout }: Props) {
-  const heure = new Date().toLocaleTimeString('fr-FR', {
-    hour: '2-digit', minute: '2-digit',
-  });
-  const date = new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long', day: 'numeric', month: 'long',
-  });
+export default function Topbar({
+  titre, nbAlertes, onLogout,
+  connected = false, theme = 'dark', onToggleTheme,
+}: Props) {
+  const [heure, setHeure] = useState('');
+  const [date,  setDate]  = useState('');
 
-  const handleLogout = () => {
-    logoutPro();
-    onLogout();
+  useEffect(() => {
+    const maj = () => {
+      setHeure(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }));
+      setDate(new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
+    };
+    maj();
+    const t = setInterval(maj, 30000);
+    return () => clearInterval(t);
+  }, []);
+
+  const isDark = theme === 'dark';
+
+  const baseStyle: React.CSSProperties = {
+    background:   isDark ? '#131109' : '#F0EAD8',
+    borderBottom: `1px solid ${isDark ? '#2E2A1A' : '#E0D8C4'}`,
+    padding:      '0 20px',
+    height:       '52px',
+    display:      'flex',
+    alignItems:   'center',
+    justifyContent: 'space-between',
+    flexShrink:   0,
   };
 
   return (
-    <div className="bg-s1 border-b border-bord px-5 h-14 flex items-center justify-between flex-shrink-0">
+    <div style={baseStyle}>
+
+      {/* Titre + date */}
       <div>
-        <div className="text-sm font-bold text-t1 capitalize">
+        <div style={{
+          fontSize: '13px', fontWeight: 600,
+          color: isDark ? '#F5F0E8' : '#1A1209',
+          textTransform: 'capitalize',
+        }}>
           {TITRES[titre] || titre}
         </div>
-        <div className="text-[10px] text-t3 mt-0.5 capitalize">
-          {date} · {heure}
+        <div style={{
+          fontSize: '10px',
+          color: isDark ? '#4A4430' : '#8C7D5E',
+          marginTop: '1px',
+          textTransform: 'capitalize',
+        }}>
+          {date}{heure ? ` · ${heure}` : ''}
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      {/* Actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+        {/* Alerte active */}
         {nbAlertes > 0 && (
-          <div className="flex items-center gap-1.5 bg-urg-red/10 border border-urg-red/30 text-red-400 text-[10px] font-semibold px-3 py-1.5 rounded-lg">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400 pulse-red inline-block"></span>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            background: 'rgba(224,126,107,0.1)',
+            border: '1px solid rgba(224,126,107,0.3)',
+            color: '#E07E6B',
+            fontSize: '10px', fontWeight: 600,
+            padding: '5px 10px', borderRadius: '8px',
+          }}>
+            <span style={{
+              width: '6px', height: '6px', borderRadius: '50%',
+              background: '#E07E6B', display: 'inline-block',
+            }} className="pulse-red" />
             {nbAlertes} alerte{nbAlertes > 1 ? 's' : ''} active{nbAlertes > 1 ? 's' : ''}
           </div>
         )}
-        <div className="flex items-center gap-1.5 bg-urg-green/10 border border-urg-green/30 text-green-400 text-[10px] font-semibold px-3 py-1.5 rounded-lg">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 pulse-green inline-block"></span>
-          Système OK
+
+        {/* Statut Realtime */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '6px',
+          background: connected
+            ? 'rgba(76,175,125,0.1)'
+            : (isDark ? 'rgba(74,68,48,0.3)' : 'rgba(140,125,94,0.1)'),
+          border: `1px solid ${connected ? 'rgba(76,175,125,0.3)' : (isDark ? '#2E2A1A' : '#E0D8C4')}`,
+          color: connected ? '#4CAF7D' : (isDark ? '#9B9070' : '#5A4E35'),
+          fontSize: '10px', fontWeight: 600,
+          padding: '5px 10px', borderRadius: '8px',
+        }}>
+          <span style={{
+            width: '6px', height: '6px', borderRadius: '50%',
+            background: connected ? '#4CAF7D' : (isDark ? '#4A4430' : '#8C7D5E'),
+            display: 'inline-block',
+          }} className={connected ? 'pulse-green' : ''} />
+          {connected ? 'Realtime actif' : 'Connexion...'}
         </div>
+
+        {/* Toggle thème */}
+        {onToggleTheme && (
+          <button
+            onClick={onToggleTheme}
+            title={theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'}
+            style={{
+              width: '32px', height: '32px',
+              background: isDark ? '#1A1710' : '#E0D8C4',
+              border: `1px solid ${isDark ? '#2E2A1A' : '#C8BFA8'}`,
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: isDark ? '#9B9070' : '#5A4E35',
+              fontSize: '14px',
+              transition: 'all 0.15s',
+            }}
+          >
+            <i className={`ti ${theme === 'dark' ? 'ti-sun' : 'ti-moon'}`} aria-hidden="true" />
+          </button>
+        )}
+
+        {/* Déconnexion */}
         <button
-          onClick={handleLogout}
-          className="text-[10px] font-semibold text-t3 hover:text-red-400 px-3 py-1.5 bg-s3 border border-bord rounded-lg transition-colors"
+          onClick={onLogout}
+          style={{
+            fontSize: '11px', fontWeight: 500,
+            color: isDark ? '#9B9070' : '#5A4E35',
+            padding: '5px 12px',
+            background: isDark ? '#1A1710' : '#E0D8C4',
+            border: `1px solid ${isDark ? '#2E2A1A' : '#C8BFA8'}`,
+            borderRadius: '8px',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+            display: 'flex', alignItems: 'center', gap: '5px',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLButtonElement).style.color = '#E07E6B';
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(224,126,107,0.3)';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLButtonElement).style.color = isDark ? '#9B9070' : '#5A4E35';
+            (e.currentTarget as HTMLButtonElement).style.borderColor = isDark ? '#2E2A1A' : '#C8BFA8';
+          }}
         >
+          <i className="ti ti-logout" style={{ fontSize: '13px' }} aria-hidden="true" />
           Déconnexion
         </button>
       </div>

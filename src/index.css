@@ -2,32 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import 'leaflet/dist/leaflet.css';
 
-* { box-sizing: border-box; }
+/* ── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
-  background: #060B14;
-  color: #F0F4FF;
+  background: #0C0A09;
+  color: #F5F0E8;
   font-family: 'Inter', system-ui, sans-serif;
   margin: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 4px; }
+/* ── Thème clair ────────────────────────────────────────────── */
+body.theme-light {
+  background: #FDFAF5;
+  color: #1A1209;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #243450; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #3D3820; border-radius: 2px; }
 
+/* ── Animations urgence ─────────────────────────────────────── */
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.3; transform: scale(0.7); }
+  0%,100% { opacity:1; transform:scale(1); }
+  50%     { opacity:0.3; transform:scale(0.7); }
 }
-
 @keyframes ripple {
-  0%   { width: 13px; height: 13px; opacity: 0.5; }
-  100% { width: 42px; height: 42px; opacity: 0; }
+  0%   { width:14px; height:14px; opacity:0.7; }
+  100% { width:64px; height:64px; opacity:0; }
+}
+@keyframes scanLine {
+  0%   { top:0%; opacity:0.6; }
+  100% { top:100%; opacity:0; }
+}
+@keyframes zoomCinema {
+  0%   { transform:scale(1); }
+  50%  { transform:scale(2.2); }
+  100% { transform:scale(1.6); }
+}
+@keyframes borderFlash {
+  0%,100% { border-color: rgba(224,126,107,0); }
+  50%     { border-color: rgba(224,126,107,0.8); }
 }
 
 .pulse-red   { animation: pulse-dot 1s ease-in-out infinite; }
 .pulse-green { animation: pulse-dot 1.4s ease-in-out infinite; }
 .pulse-amber { animation: pulse-dot 1.2s ease-in-out infinite; }
 .map-ripple  { animation: ripple 2s ease-out infinite; }
+.scan-line   { animation: scanLine 2s linear infinite; position:absolute; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,#CFA237,transparent); }
+.zone-flash  { animation: borderFlash 0.8s ease-in-out 3; }
+.zoom-cinema { animation: zoomCinema 1.5s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+/* ── Carte Leaflet — override ───────────────────────────────── */
+.leaflet-container {
+  background: #131109 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+.leaflet-tile-pane { filter: brightness(0.85) saturate(0.9); }
+.leaflet-popup-content-wrapper {
+  background: #1A1710 !important;
+  border: 1px solid #2E2A1A !important;
+  border-radius: 12px !important;
+  color: #F5F0E8 !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+}
+.leaflet-popup-tip { background: #1A1710 !important; }
+.leaflet-control-zoom a {
+  background: #1A1710 !important;
+  color: #CFA237 !important;
+  border-color: #2E2A1A !important;
+}
+
+/* ── Gold glow ──────────────────────────────────────────────── */
+.gold-glow { box-shadow: 0 0 20px rgba(207,162,55,0.25); }
+.urg-glow  { box-shadow: 0 0 20px rgba(224,126,107,0.25); }
