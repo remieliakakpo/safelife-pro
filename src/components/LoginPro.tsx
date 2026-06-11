@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
-import { loginPro } from '../services/api';
+import { getCurrentUser } from '../services/api';
 
 interface Props {
   onSuccess: () => void;
 }
 
-const CODES_TEST = [
+/*const CODES_TEST = [
   { code: 'SAMU-CHU-0812',   role: 'SAMU · CHU Sylvanus Olympio' },
   { code: 'POMPIERS-LME-118',role: 'Pompiers · Caserne de Lomé' },
   { code: 'POLICE-LME-4471', role: 'Police Nationale · Lomé' },
   { code: 'AMBU-BE-0021',    role: 'Ambulanciers · Hôpital de Bè' },
-];
+];*/
+
+const CODES_VALIDES: Record<string, { nom: string; role: string; unite: string }> = {
+  'SAMU-CHU-0812':    { nom: 'Dr. Kofi Mensah',   role: 'Médecin SAMU',    unite: 'CHU Sylvanus Olympio' },
+  'POMPIERS-LME-118': { nom: 'Cpt. Ama Sodzi',    role: 'Capitaine',       unite: 'Caserne Lomé Centre'  },
+  'POLICE-LME-4471':  { nom: 'Insp. Kwame Doe',   role: 'Inspecteur',      unite: 'Police Nationale'     },
+  'AMBU-BE-0021':     { nom: 'Yawa Agbeko',        role: 'Ambulancier',     unite: 'Ambulance Bè'         },
+  'MEDC3737':         { nom: 'Dr. Fiifi Asante',   role: 'Médecin urgence', unite: 'Clinique Biasa'       },
+  'POL1717':          { nom: 'Adj. Kokou Dossou',  role: 'Adjudant',        unite: 'Gendarmerie Lomé'     },
+};
 
 export default function LoginPro({ onSuccess }: Props) {
   const [code,     setCode]     = useState('');
@@ -19,7 +28,7 @@ export default function LoginPro({ onSuccess }: Props) {
   const [error,    setError]    = useState('');
   const [showPwd,  setShowPwd]  = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  /*const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim() || !password.trim()) {
       setError('Veuillez remplir tous les champs.');
@@ -35,7 +44,44 @@ export default function LoginPro({ onSuccess }: Props) {
     } finally {
       setLoading(false);
     }
-  };
+  };*/
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!code.trim() || !password.trim()) {
+    setError('Veuillez remplir tous les champs.');
+    return;
+  }
+  setLoading(true);
+  setError('');
+
+  await new Promise(r => setTimeout(r, 500));
+
+  const codeUpper = code.trim().toUpperCase();
+  const user      = CODES_VALIDES[codeUpper];
+
+  if (!user) {
+    setError('Code institutionnel non reconnu.');
+    setLoading(false);
+    return;
+  }
+  if (password !== 'safelife2024') {
+    setError('Mot de passe incorrect.');
+    setLoading(false);
+    return;
+  }
+
+  localStorage.setItem('safelife_pro_token', `local_${codeUpper}_${Date.now()}`);
+  localStorage.setItem('safelife_pro_user',  JSON.stringify({
+    code:  codeUpper,
+    nom:   user.nom,
+    role:  user.role,
+    unite: user.unite,
+  }));
+
+  setLoading(false);
+  onSuccess();
+};
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center p-4">
@@ -141,15 +187,15 @@ export default function LoginPro({ onSuccess }: Props) {
             Codes de test — mot de passe : <span className="text-urg-green font-mono">safelife2024</span>
           </p>
           <div className="flex flex-col gap-2">
-            {CODES_TEST.map(item => (
+            {CODES_VALIDES && Object.entries(CODES_VALIDES).map(([code, user]) => (
               <button
-                key={item.code}
+                key={code}
                 type="button"
-                onClick={() => { setCode(item.code); setPassword('safelife2024'); }}
+                onClick={() => { setCode(code); setPassword('safelife2024'); }}
                 className="text-left px-3 py-2 bg-s3 border border-bord rounded-xl hover:border-urg-green/40 transition-colors"
               >
-                <span className="text-xs font-mono text-urg-green">{item.code}</span>
-                <span className="text-xs text-t3 ml-2">— {item.role}</span>
+                <span className="text-xs font-mono text-urg-green">{code}</span>
+                <span className="text-xs text-t3 ml-2">— {user.role}</span>
               </button>
             ))}
           </div>
