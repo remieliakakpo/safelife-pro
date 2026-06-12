@@ -189,13 +189,16 @@ export default function App() {
   };
 
   return (
-    <div
+    /*<div
       className="flex h-screen overflow-hidden"
       style={{
         background: theme === 'light' ? '#FDFAF5' : '#0C0A09',
         color:      theme === 'light' ? '#1A1209' : '#F5F0E8',
       }}
-    >
+    >*/
+    <div className="flex-1 min-h-0 flex flex-col">
+      {PAGES[page] ?? PAGES['dashboard']}   
+    
       <Sidebar
         page={page}
         onNavigate={handleNavigate}
@@ -204,7 +207,7 @@ export default function App() {
         connected={connected}
         theme={theme}
       />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col">
         <Topbar
           titre={page}
           nbAlertes={nbAlertes}
@@ -213,7 +216,7 @@ export default function App() {
           theme={theme}
           onToggleTheme={toggleTheme}
         />
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col">
           {PAGES[page] ?? PAGES['dashboard']}
         </div>
       </div>
